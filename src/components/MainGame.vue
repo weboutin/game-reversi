@@ -1,6 +1,8 @@
 <template>
   <div class="main-game">
-    <div class="menu"></div>
+    <div class="menu">
+      <div class="menu-score">{{ score }}</div>
+    </div>
     <div class="ctr-pannel">
       <div v-for="row, rowIndex in blocks" :key="rowIndex" class="ctr-pannel-row">
         <div v-for="block, blockIndex in row" :key="`${rowIndex}-${blockIndex}`"
@@ -12,6 +14,7 @@
 </template>
 
 <script>
+
 
 function getRandomInt(min, max) {
   min = Math.ceil(min);
@@ -27,11 +30,12 @@ export default {
   data: () => {
     return {
       blocks: [
-        [2, 2, 2, 4],
         [-1, -1, -1, -1],
         [-1, -1, -1, -1],
         [-1, -1, -1, -1],
-      ]
+        [-1, -1, -1, -1],
+      ],
+      score: 4
     }
   },
   methods: {
@@ -64,33 +68,67 @@ export default {
       this.$set(this.blocks, this.blocks)
     },
     mergeBlock(direction, reverse) {
-      console.log(reverse)
-      for (let i = 0; i < this.blocks.length; i++) {
-        for (let j = 0; j < this.blocks[i].length; j++) {
-          let next, tmpi, tmpj
-          if (direction == 'row') {
-            for (let n = j; n < this.blocks[i].length - 1; n++) {
-              next = this.blocks[i][n + 1]
-              if (next != -1) {
-                tmpi = i
-                tmpj = n + 1
-                break
+      let moved = false
+      if (reverse) {
+        for (let i = 0; i < this.blocks.length; i++) {
+          for (let j = 0; j < this.blocks[i].length; j++) {
+            let next, tmpi, tmpj
+            if (direction == 'row') {
+              for (let n = j; n < this.blocks[i].length - 1; n++) {
+                next = this.blocks[i][n + 1]
+                if (next != -1) {
+                  tmpi = i
+                  tmpj = n + 1
+                  break
+                }
+              }
+            } else {
+              for (let n = i; n < this.blocks.length - 1; n++) {
+                next = this.blocks[n + 1][j]
+                if (next != -1) {
+                  tmpi = n + 1
+                  tmpj = j
+                  break
+                }
               }
             }
-          } else {
-            for (let n = i; n < this.blocks.length - 1; n++) {
-              next = this.blocks[n + 1][j]
-              if (next != -1) {
-                tmpi = n + 1
-                tmpj = j
-                break
-              }
+            if (next == -1) continue
+            if (this.blocks[i][j] == next) {
+              moved = true
+              this.blocks[i][j] = this.blocks[i][j] * 2
+              this.blocks[tmpi][tmpj] = -1
             }
           }
-          if (next == -1) continue
-          if (this.blocks[i][j] == next) {
-            this.blocks[i][j] = this.blocks[i][j] * 2
-            this.blocks[tmpi][tmpj] = -1
+        }
+      } else {
+        for (let i = this.blocks.length - 1; i >= 0; i--) {
+          for (let j = this.blocks[i].length - 1; j >= 0; j--) {
+            let next, tmpi, tmpj
+            if (direction == 'row') {
+              for (let n = j; n > 0; n--) {
+                next = this.blocks[i][n - 1]
+                if (next != -1) {
+                  tmpi = i
+                  tmpj = n - 1
+                  break
+                }
+              }
+            } else {
+              for (let n = i; n > 0; n--) {
+                next = this.blocks[n - 1][j]
+                if (next != -1) {
+                  tmpi = n - 1
+                  tmpj = j
+                  break
+                }
+              }
+            }
+            if (next == -1) continue
+            if (this.blocks[i][j] == next) {
+              moved = true
+              this.blocks[i][j] = this.blocks[i][j] * 2
+              this.blocks[tmpi][tmpj] = -1
+            }
           }
         }
       }
@@ -102,6 +140,7 @@ export default {
             for (let j = 0; j < this.blocks[i].length - 1; j++) {
               for (let k = 0; k < this.blocks[i].length - 1; k++) {
                 if (this.blocks[i][k] == -1) {
+                  if (this.blocks[i][k + 1] != -1) moved = true
                   let tmp = this.blocks[i][k]
                   this.blocks[i][k] = this.blocks[i][k + 1]
                   this.blocks[i][k + 1] = tmp
@@ -114,6 +153,7 @@ export default {
             for (let j = this.blocks.length - 1; j >= 0; j--) {
               for (let k = this.blocks[i].length - 1; k > 0; k--) {
                 if (this.blocks[i][k] == -1) {
+                  if (this.blocks[i][k - 1] != -1) moved = true
                   let tmp = this.blocks[i][k]
                   this.blocks[i][k] = this.blocks[i][k - 1]
                   this.blocks[i][k - 1] = tmp
@@ -129,9 +169,11 @@ export default {
             for (let j = 0; j < this.blocks[i].length; j++) {
               for (let k = 0; k < this.blocks[i].length - 1; k++) {
                 if (this.blocks[k][j] == -1) {
+                  if (this.blocks[k + 1][j] != -1) moved = true
                   let tmp = this.blocks[k][j]
                   this.blocks[k][j] = this.blocks[k + 1][j]
                   this.blocks[k + 1][j] = tmp
+
                 }
               }
             }
@@ -141,6 +183,7 @@ export default {
             for (let j = this.blocks.length - 1; j >= 0; j--) {
               for (let k = this.blocks[i].length - 1; k > 0; k--) {
                 if (this.blocks[k][j] == -1) {
+                  if (this.blocks[k - 1][j] != -1) moved = true
                   let tmp = this.blocks[k][j]
                   this.blocks[k][j] = this.blocks[k - 1][j]
                   this.blocks[k - 1][j] = tmp
@@ -151,6 +194,10 @@ export default {
 
         }
       }
+      // 如果没有产生移动，不产生新的数值
+      if (!moved) return
+
+
       for (let i = 0; i < this.blocks.length - 1; i++) {
         for (let j = 0; j < this.blocks[i].length; j++) {
           this.$set(this.blocks[i], j, this.blocks[i][j])
@@ -165,17 +212,26 @@ export default {
           }
         }
       }
-      // if (maxBlockValue < 512) {
-      //   this.createRandom([2], 2)
-      // } else if (maxBlockValue >= 512 && maxBlockValue < 1024) {
-      //   this.createRandom([2], 1)
-      // } else if (maxBlockValue >= 1024) {
-      //   this.createRandom([2, 4], 1)
-      // }
+      if (maxBlockValue < 512) {
+        this.createRandom([2], 1)
+      } else if (maxBlockValue >= 512 && maxBlockValue < 1024) {
+        this.createRandom([2], 1)
+      } else if (maxBlockValue >= 1024) {
+        this.createRandom([2, 4], 1)
+      }
+      this.score = 0
+      for (let i = 0; i < this.blocks.length; i++) {
+        for (let j = 0; j < this.blocks[i].length; j++) {
+          if (this.blocks[i][j] != -1) {
+            this.score += this.blocks[i][j]
+          }
+        }
+      }
+      // console.log(this.score)
     },
 
     init() {
-      // this.createRandom([2], 2)
+      this.createRandom([2], 2)
     },
 
   },
@@ -198,9 +254,32 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.main-game {
+  width: 1000px;
+  height: 1000px;
+  position: fixed;
+  left: 50%;
+  margin-left: -500px;
+}
+.menu {
+  width: 200px;
+  height: 100px;
+}
+
+.menu-score {
+  width: 100px;
+  height: 80px;
+  background-color: rgb(227, 198, 67);
+  border-radius: 5px;
+  color: rgb(255, 255, 255);
+  font-size: 40px;
+  line-height: 80px;
+}
+
 .ctr-pannel {
   width: 600px;
   height: 600px;
+  position: fixed;
 }
 
 .ctr-pannel-row {
@@ -213,9 +292,11 @@ export default {
   background-color: rgb(200, 192, 179);
   text-align: center;
   line-height: 100px;
-  margin-left: 10px;
-  margin-top: 10px;
+  border-radius: 5px;
+  padding-top: 10px; 
   font-size: 40px;
+  margin-top: 10px;
+  margin-left: 10px;
 }
 
 .block-custom-style--1 {
@@ -235,26 +316,46 @@ export default {
 
 .block-custom-style-8 {
   background-color: rgb(231, 179, 131);
-  color: rgb(255, 255，255);
+  color: rgb(255, 255, 255);
 }
 
 .block-custom-style-16 {
   background-color: rgb(229, 152, 108);
-  color: rgb(255, 255，255);
+  color: rgb(255, 255, 255);
 }
 
 .block-custom-style-32 {
   background-color: rgb(228, 130, 100);
-  color: rgb(255, 255，255);
+  color: rgb(255, 255, 255);
 }
 
 .block-custom-style-64 {
   background-color: rgb(226, 103, 70);
-  color: rgb(255, 255，255);
+  color: rgb(255, 255, 255);
 }
 
 .block-custom-style-128 {
   background-color: rgb(229, 208, 107);
-  color: rgb(255, 255，255);
+  color: rgb(255, 255, 255);
+}
+
+.block-custom-style-256 {
+  background-color: rgb(229, 208, 127);
+  color: rgb(255, 255, 255);
+}
+
+.block-custom-style-512 {
+  background-color: rgb(229, 208, 137);
+  color: rgb(255, 255, 255);
+}
+
+.block-custom-style-1024 {
+  background-color: rgb(229, 208, 147);
+  color: rgb(255, 255, 255);
+}
+
+.block-custom-style-2048 {
+  background-color: rgb(229, 208, 157);
+  color: rgb(255, 255, 255);
 }
 </style>
