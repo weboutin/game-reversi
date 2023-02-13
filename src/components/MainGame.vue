@@ -1,7 +1,7 @@
 <template>
   <div class="main-game">
     <div class="menu">
-      <div class="menu-score">{{ score }}</div>
+      <div class="menu-score">score: {{ score }}</div>
     </div>
     <div class="ctr-pannel">
       <div v-for="row, rowIndex in blocks" :key="rowIndex" class="ctr-pannel-row">
@@ -227,7 +227,6 @@ export default {
           }
         }
       }
-      // console.log(this.score)
     },
 
     init() {
@@ -267,19 +266,22 @@ export default {
 }
 
 .menu-score {
-  width: 100px;
+  width: 300px;
   height: 80px;
   background-color: rgb(227, 198, 67);
   border-radius: 5px;
   color: rgb(255, 255, 255);
   font-size: 40px;
   line-height: 80px;
+  padding-left: 30px;
 }
 
 .ctr-pannel {
-  width: 600px;
-  height: 600px;
+  width: 450px;
+  height: 450px;
   position: fixed;
+  border: 3px solid rgb(183, 172, 160);
+  border-radius: 3px;
 }
 
 .ctr-pannel-row {
@@ -293,7 +295,6 @@ export default {
   text-align: center;
   line-height: 100px;
   border-radius: 5px;
-  padding-top: 10px; 
   font-size: 40px;
   margin-top: 10px;
   margin-left: 10px;
