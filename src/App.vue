@@ -5,7 +5,8 @@
 </template>
 
 <script>
-import MainGame from './components/MainGame.vue'
+import MainGame from './components/MainGameMobile.vue'
+import 'reset.css'
 
 export default {
   name: 'App',
