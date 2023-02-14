@@ -243,15 +243,15 @@ export default {
   mounted() {
     this.init()
     // 上38 下40 左37 右39
-    // document.onkeydown = () => {
-    //   const keyCode = window.event.keyCode
-    //   switch (keyCode) {
-    //     case 38: this.mergeBlock('column', true); break;
-    //     case 40: this.mergeBlock('column', false); break;
-    //     case 37: this.mergeBlock('row', true); break;
-    //     case 39: this.mergeBlock('row', false); break;
-    //   }
-    // }
+    document.onkeydown = () => {
+      const keyCode = window.event.keyCode
+      switch (keyCode) {
+        case 38: this.mergeBlock('column', true); break;
+        case 40: this.mergeBlock('column', false); break;
+        case 37: this.mergeBlock('row', true); break;
+        case 39: this.mergeBlock('row', false); break;
+      }
+    }
     let handler = ''
     window.addEventListener('touchstart', function (e) {
       handler = ''
