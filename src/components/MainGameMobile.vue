@@ -3,23 +3,38 @@
     <div class="header">2048</div>
     <div class="menu">
       <div class="menu-score">score: {{ score }}</div>
+      <div class="menu-restart" @click="clickRestart">重开</div>
     </div>
-    <div class="ctr-pannel-box">
-      <div class="ctr-pannel">
-
-        <div v-for="row, rowIndex in blocks" :key="rowIndex" class="ctr-pannel-row">
-          <div v-for="block, blockIndex in row" :key="`${rowIndex}-${blockIndex}`" :class="['block-box']">
-            <div :class="['block', `block-custom-style-${block}`]">
-              {{ block == -1 ? '' : block }}
+    <div id="ctrl-area">
+      <div class="ctr-pannel-box">
+        <div class="ctr-pannel">
+          <div v-for="row, rowIndex in blocks" :key="rowIndex" class="ctr-pannel-row">
+            <div v-for="block, blockIndex in row" :key="`${rowIndex}-${blockIndex}`" :class="['block-box']">
+              <div :class="['block', `block-custom-style-${block}`]">
+                {{ block == -1 ? '' : block }}
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+    <CommonPopup :isShow="isShow" @close="isShow = false">
+      <div class="restartPopup">
+        <div class="restartPopup-ensure" @click="restart">重开</div>
+        <div class="restartPopup-cancel" @click="clickCancel">取消</div>
+      </div>
+    </CommonPopup>
+    <CommonPopup :isShow="isShowLost" @close="isShowLost = false">
+      <div class="lostPopup">
+        <div class="lostPopup-text">You Lost !</div>
+        <div class="restartPopup-ensure" @click="restart">重开</div>
+      </div>
+    </CommonPopup>
   </div>
 </template>
 
 <script>
+import CommonPopup from '../components/common/popup'
 
 
 function getRandomInt(min, max) {
@@ -30,8 +45,8 @@ function getRandomInt(min, max) {
 
 export default {
   name: 'MainGame',
-  props: {
-    msg: String
+  components: {
+    CommonPopup
   },
   data: () => {
     return {
@@ -41,10 +56,30 @@ export default {
         [-1, -1, -1, -1],
         [-1, -1, -1, -1],
       ],
-      score: 4
+      score: 4,
+      isShow: false,
+      isShowLost: false
     }
   },
   methods: {
+    clickRestart() {
+      this.isShow = true
+    },
+    clickCancel() {
+      this.isShow = false
+    },
+    restart() {
+      this.isShow = false
+      this.isShowLost = false
+      this.blocks = [
+        [-1, -1, -1, -1],
+        [-1, -1, -1, -1],
+        [-1, -1, -1, -1],
+        [-1, -1, -1, -1],
+      ]
+      this.createRandom([2], 2)
+      this.render()
+    },
     createRandom(values, count) {
       let value = values[0]
       if (values.length > 1) {
@@ -201,6 +236,10 @@ export default {
         }
       }
       // 如果没有产生移动，不产生新的数值
+      console.log(this.checkIsLost)
+      if (this.checkIsLost()) {
+        this.isShowLost = true
+      }
       if (!moved) return
 
 
@@ -211,13 +250,7 @@ export default {
       }
 
       let maxBlockValue = 2;
-      for (let i = 0; i < this.blocks.length; i++) {
-        for (let j = 0; j < this.blocks[i].length; j++) {
-          if (this.blocks[i][j] > maxBlockValue) {
-            maxBlockValue = this.blocks[i][j]
-          }
-        }
-      }
+      this.render()
       if (maxBlockValue < 512) {
         this.createRandom([2], 1)
       } else if (maxBlockValue >= 512 && maxBlockValue < 1024) {
@@ -233,11 +266,51 @@ export default {
           }
         }
       }
+
+      if (this.checkIsLost()) {
+        this.isShowLost = true
+      }
+    },
+    render() {
+      for (let i = 0; i < this.blocks.length - 1; i++) {
+        for (let j = 0; j < this.blocks[i].length; j++) {
+          this.$set(this.blocks[i], j, this.blocks[i][j])
+        }
+      }
     },
 
     init() {
       this.createRandom([2], 2)
     },
+    checkIsLost() {
+      const len = this.blocks.length
+      for (let i = 0; i < this.blocks.length - 1; i++) {
+        for (let j = 0; j < this.blocks[i].length; j++) {
+          const current = this.blocks[i][j]
+          console.log(`${i} ${j}`)
+          //上下左右存在相等元素
+          if (i > 0 && current == this.blocks[i - 1][j]) {
+            return false
+          }
+          if (i < len - 1 && current == this.blocks[i + 1][j]) {
+            return false
+          }
+          if (j > 0) {
+            if (this.blocks[i][j - 1] == current) {
+              return false
+            }
+          }
+          // if (j > 0 && current == this.block[i][j - 1]) {
+          //   return false
+          // }
+          if (j < len - 1 && current == this.blocks[i][j + 1]) {
+            return false
+          }
+        }
+      }
+      //输掉游戏
+      return true
+    }
 
   },
   mounted() {
@@ -253,13 +326,15 @@ export default {
       }
     }
     let handler = ''
-    window.addEventListener('touchstart', function (e) {
+    // window.addEventListener('touchstart', function (e) {
+    document.getElementById('ctrl-area').addEventListener('touchstart', function (e) {
       handler = ''
       // console.log('touchstart:', e)
       this.startX = e.changedTouches[0].pageX
       this.startY = e.changedTouches[0].pageY
     })
-    window.addEventListener('touchmove', function (e) {
+    // window.addEventListener('touchmove', function (e) {
+    document.getElementById('ctrl-area').addEventListener('touchmove', function (e) {
       e.preventDefault()
       // console.log('touchmove:', e)
       if (e.changedTouches.length) {
@@ -283,8 +358,9 @@ export default {
           // console.log("just touch", X, Y);
         }
       }
-    }, {passive: false})
-    window.addEventListener('touchend', () => {
+    }, { passive: false })
+    document.getElementById('ctrl-area').addEventListener('touchend', () => {
+      // window.addEventListener('touchend', () => {
       console.log(handler)
       switch (handler) {
         case 'top': this.mergeBlock('column', true); break;
@@ -318,14 +394,14 @@ export default {
   margin-top: 30px;
   width: 100%;
   padding: 0 10px;
-  ;
   box-sizing: border-box;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
+  /* justify-content: ; */
 }
 
 .menu-score {
-  width: 360px;
+  width: 210px;
   height: 60px;
   background-color: rgb(227, 198, 67);
   border-radius: 5px;
@@ -333,7 +409,18 @@ export default {
   font-size: 30px;
   line-height: 60px;
   box-sizing: border-box;
-  padding-left: 10px;
+  padding-left: 20px;
+}
+
+.menu-restart {
+  width: 100px;
+  height: 60px;
+  background-color: rgb(201, 96, 96);
+  line-height: 60px;
+  text-align: center;
+  border-radius: 5px;
+  cursor: pointer;
+  color: rgb(255, 255, 255);
 }
 
 .ctr-pannel-box {
@@ -430,5 +517,49 @@ export default {
 .block-custom-style-2048 {
   background-color: rgb(229, 208, 157);
   color: rgb(255, 255, 255);
+}
+
+.restartPopup {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 20px;
+  padding-bottom: 50px;
+}
+
+.restartPopup-ensure {
+  width: 80%;
+  height: 50px;
+  background-color: #0065e6;
+  color: #fff;
+  box-sizing: border-box;
+  border-radius: 10px;
+  line-height: 50px;
+  text-align: center;
+}
+
+.restartPopup-cancel {
+  width: 80%;
+  height: 50px;
+  background-color: #e6ece1;
+  box-sizing: border-box;
+  border-radius: 10px;
+  line-height: 50px;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.lostPopup-text {
+  width: 100%;
+  text-align: center;
+  font-size: 20px;
+  margin-top: 50px;
+}
+
+.lostPopup {
+  height: 200px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 </style>
