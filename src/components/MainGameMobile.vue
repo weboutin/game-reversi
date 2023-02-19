@@ -36,6 +36,8 @@
 <script>
 import CommonPopup from '../components/common/popup'
 
+const GAME_RECORD = 'game-record'
+
 
 function getRandomInt(min, max) {
   min = Math.ceil(min);
@@ -69,6 +71,7 @@ export default {
       this.isShow = false
     },
     restart() {
+      localStorage.removeItem(GAME_RECORD)
       this.isShow = false
       this.isShowLost = false
       this.blocks = [
@@ -265,8 +268,11 @@ export default {
       }
 
       if (this.checkIsLost()) {
+        localStorage.removeItem(GAME_RECORD)
         this.isShowLost = true
       }
+
+      localStorage.setItem(GAME_RECORD, JSON.stringify(this.blocks))
     },
     render() {
       for (let i = 0; i < this.blocks.length - 1; i++) {
@@ -277,7 +283,13 @@ export default {
     },
 
     init() {
-      this.createRandom([2], 2)
+      const record = localStorage.getItem(GAME_RECORD)
+      if (record) {
+        this.blocks = JSON.parse(record)
+        this.render()
+      } else {
+        this.createRandom([2], 2)
+      }
     },
     checkIsLost() {
       const len = this.blocks.length
@@ -559,6 +571,6 @@ export default {
 
 #ctrl-area {
   width: 100%;
-  min-height: 100vh;
+  min-height: 100vh -120px;
 }
 </style>
