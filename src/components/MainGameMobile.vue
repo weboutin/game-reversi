@@ -571,6 +571,6 @@ export default {
 
 #ctrl-area {
   width: 100%;
-  min-height: 100vh -120px;
+  min-height: calc(100vh - 120px);
 }
 </style>
