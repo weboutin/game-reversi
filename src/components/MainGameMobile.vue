@@ -235,11 +235,6 @@ export default {
 
         }
       }
-      // 如果没有产生移动，不产生新的数值
-      console.log(this.checkIsLost)
-      if (this.checkIsLost()) {
-        this.isShowLost = true
-      }
       if (!moved) return
 
 
@@ -258,6 +253,8 @@ export default {
       } else if (maxBlockValue >= 1024) {
         this.createRandom([2, 4], 1)
       }
+
+
       this.score = 0
       for (let i = 0; i < this.blocks.length; i++) {
         for (let j = 0; j < this.blocks[i].length; j++) {
@@ -284,10 +281,13 @@ export default {
     },
     checkIsLost() {
       const len = this.blocks.length
-      for (let i = 0; i < this.blocks.length - 1; i++) {
+      for (let i = 0; i < this.blocks.length; i++) {
         for (let j = 0; j < this.blocks[i].length; j++) {
           const current = this.blocks[i][j]
-          console.log(`${i} ${j}`)
+          // console.log(`${i} ${j}`)
+          if (current == -1) {
+            return false
+          }
           //上下左右存在相等元素
           if (i > 0 && current == this.blocks[i - 1][j]) {
             return false
@@ -295,14 +295,9 @@ export default {
           if (i < len - 1 && current == this.blocks[i + 1][j]) {
             return false
           }
-          if (j > 0) {
-            if (this.blocks[i][j - 1] == current) {
-              return false
-            }
+          if (j > 0 && current == this.blocks[i][j - 1]) {
+            return false
           }
-          // if (j > 0 && current == this.block[i][j - 1]) {
-          //   return false
-          // }
           if (j < len - 1 && current == this.blocks[i][j + 1]) {
             return false
           }
@@ -361,7 +356,6 @@ export default {
     }, { passive: false })
     document.getElementById('ctrl-area').addEventListener('touchend', () => {
       // window.addEventListener('touchend', () => {
-      console.log(handler)
       switch (handler) {
         case 'top': this.mergeBlock('column', true); break;
         case 'bottom': this.mergeBlock('column', false); break;
