@@ -1,11 +1,11 @@
 <template>
   <div class="main-game">
     <div class="header">2048</div>
-    <div class="menu">
-      <div class="menu-score">score: {{ score }}</div>
-      <div class="menu-restart" @click="clickRestart">重开</div>
-    </div>
     <div id="ctrl-area">
+      <div class="menu">
+        <div class="menu-score">score: {{ score }}</div>
+        <div class="menu-restart" @click="clickRestart">重开</div>
+      </div>
       <div class="ctr-pannel-box">
         <div class="ctr-pannel">
           <div v-for="row, rowIndex in blocks" :key="rowIndex" class="ctr-pannel-row">
@@ -555,5 +555,10 @@ export default {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+}
+
+#ctrl-area {
+  width: 100%;
+  min-height: 100vh;
 }
 </style>
