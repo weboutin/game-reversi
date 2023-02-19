@@ -5,6 +5,8 @@
       <div class="menu">
         <div class="menu-restart" @click="clickRestart">投了</div>
         <div class="current-chess">轮到黑子</div>
+        <div class="count">黑子数:{{ blackChessCount }}</div>
+        <div class="count">白字数:{{ whiteChessCount }}</div>
       </div>
       <div class="ctr-pannel-box">
         <div class="ctr-pannel">
@@ -53,7 +55,9 @@ export default {
       ],
       score: 4,
       isShow: false,
-      currentPlayer: 0
+      currentPlayer: 0,
+      blackChessCount: 2,
+      whiteChessCount: 2,
     }
   },
   methods: {
@@ -76,6 +80,22 @@ export default {
         this.currentPlayer = 0
       }
       this.render()
+      this.countChess()
+    },
+
+    countChess() {
+      this.blackChessCount = 0
+      this.whiteChessCount = 0
+      for (let i = 0; i < 8; i++) {
+        for (let j = 0; j < 8; j++) {
+          if (this.blocks[i][j] == 0) {
+            this.blackChessCount++
+          } else if (this.blocks[i][j] == 1) {
+            this.whiteChessCount++
+          }
+        }
+
+      }
     },
 
     checkCanPlay() {
