@@ -44,10 +44,10 @@ export default {
       blocks: [
         [-1, -1, -1, -1, -1, -1, -1, -1],
         [-1, -1, -1, -1, -1, -1, -1, -1],
-        [-1, 1, -1, -1, -1, -1, -1, -1],
-        [-1, -1, 0, 0, 1, -1, -1, -1],
-        [-1, 1, -1, 1, 0, -1, -1, -1],
-        [-1, -1, 0, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, 0, 1, -1, -1, -1],
+        [-1, -1, -1, 1, 0, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1],
         [-1, -1, -1, -1, -1, -1, -1, -1],
         [-1, -1, -1, -1, -1, -1, -1, -1],
       ],
@@ -61,10 +61,14 @@ export default {
       if (this.blocks[i][j] != -1) return
       //判断是否可以下子
       this.checkCanPlay();
+      //翻转棋子
+      const hasReversi = this.reversi(i, j)
+      //不符合下棋规则
+      if (!hasReversi) {
+        return
+      }
       //下子
       this.blocks[i][j] = this.currentPlayer
-      //翻转棋子
-      this.reversi(i, j)
       //切换棋手
       if (this.currentPlayer == 0) {
         this.currentPlayer = 1
@@ -78,21 +82,22 @@ export default {
 
     },
     reversi(m, n) {
+      let hasReversi = false
       //往8个方向搜索是否存在最近同子
       let sameIndex = 0
       //往下搜索
       let i = m + 1, j = n
       let tmpM = m, tmpN = n
       while (i < 8) {
+        if (this.blocks[i][j] == -1) break
         if (this.blocks[i][j] == this.currentPlayer) {
-          console.log(111)
-          if (this.blocks[i][j] == -1) break
           sameIndex = i
           break
         }
         i++
       }
-      if (sameIndex != 0) {
+      if (sameIndex != 0 && Math.abs(sameIndex - tmpM) != 1) {
+        hasReversi = true
         while (tmpM < sameIndex) {
           this.blocks[tmpM][j] = this.currentPlayer
           tmpM++
@@ -103,13 +108,15 @@ export default {
       sameIndex = 0
       i = m - 1, j = n
       while (i > 0) {
+        if (this.blocks[i][j] == -1) break
         if (this.blocks[i][j] == this.currentPlayer) {
           sameIndex = i
           break
         }
         i--
       }
-      if (sameIndex != 0) {
+      if (sameIndex != 0 && Math.abs(sameIndex - tmpM) != 1) {
+        hasReversi = true
         while (tmpM > sameIndex) {
           this.blocks[tmpM][j] = this.currentPlayer
           tmpM--
@@ -120,13 +127,15 @@ export default {
       sameIndex = 0
       i = m, j = n + 1
       while (j < 8) {
+        if (this.blocks[i][j] == -1) break
         if (this.blocks[i][j] == this.currentPlayer) {
           sameIndex = j
           break
         }
         j++
       }
-      if (sameIndex != 0) {
+      if (sameIndex != 0 && Math.abs(sameIndex - tmpN) != 1) {
+        hasReversi = true
         while (tmpN < sameIndex) {
           this.blocks[i][tmpN] = this.currentPlayer
           tmpN++
@@ -137,13 +146,15 @@ export default {
       sameIndex = 0
       i = m, j = n - 1
       while (j > 0) {
+        if (this.blocks[i][j] == -1) break
         if (this.blocks[i][j] == this.currentPlayer) {
           sameIndex = j
           break
         }
         j--
       }
-      if (sameIndex != 0) {
+      if (sameIndex != 0 && Math.abs(sameIndex - tmpN) != 1) {
+        hasReversi = true
         while (tmpN > sameIndex) {
           this.blocks[i][tmpN] = this.currentPlayer
           tmpN--
@@ -154,20 +165,87 @@ export default {
       tmpM = m, tmpN = n
       i = m - 1, j = n - 1
       while (i > 0 && j > 0) {
+        if (this.blocks[i][j] == -1) break
         if (this.blocks[i][j] == this.currentPlayer) {
-          sameIndex = [i, j]
+          sameMultIndex = [i, j]
           break
         }
         j--
         i--
       }
-      if (sameIndex != 0) {
+      if (sameMultIndex != 0 && Math.abs(sameMultIndex[0] - tmpM) != 1 && Math.abs(sameMultIndex[1] - tmpN) != 1) {
+        hasReversi = true
         while (tmpM > sameMultIndex[0] && tmpN > sameMultIndex[1]) {
           this.blocks[tmpM][tmpN] = this.currentPlayer
           tmpM--
           tmpN--
         }
       }
+      //往左下
+      sameMultIndex = 0
+      tmpM = m, tmpN = n
+      i = m + 1, j = n - 1
+      while (i < 8 && j > 0) {
+        if (this.blocks[i][j] == -1) break
+        if (this.blocks[i][j] == this.currentPlayer) {
+          sameMultIndex = [i, j]
+          break
+        }
+        i++
+        j--
+      }
+      if (sameMultIndex != 0 && Math.abs(sameMultIndex[0] - tmpM) != 1 && Math.abs(sameMultIndex[1] - tmpN) != 1) {
+        hasReversi = true
+        while (tmpM < sameMultIndex[0] && tmpN > sameMultIndex[1]) {
+          this.blocks[tmpM][tmpN] = this.currentPlayer
+          tmpM++
+          tmpN--
+        }
+      }
+      //往右下
+      sameMultIndex = 0
+      tmpM = m, tmpN = n
+      i = m + 1, j = n + 1
+      while (i < 8 && j < 8) {
+        if (this.blocks[i][j] == -1) break
+        if (this.blocks[i][j] == this.currentPlayer) {
+          sameMultIndex = [i, j]
+          break
+        }
+        i++
+        j++
+      }
+      if (sameMultIndex != 0 && Math.abs(sameMultIndex[0] - tmpM) != 1 && Math.abs(sameMultIndex[1] - tmpN) != 1) {
+        hasReversi = true
+        while (tmpM < sameMultIndex[0] && tmpN < sameMultIndex[1]) {
+          this.blocks[tmpM][tmpN] = this.currentPlayer
+          tmpM++
+          tmpN++
+        }
+      }
+      //往右上
+      sameMultIndex = 0
+      tmpM = m, tmpN = n
+      i = m - 1, j = n + 1
+      while (i > 0 && j < 8) {
+        if (this.blocks[i][j] == -1) break
+        if (this.blocks[i][j] == this.currentPlayer) {
+          sameMultIndex = [i, j]
+          break
+        }
+        i--
+        j++
+      }
+      if (sameMultIndex != 0 && Math.abs(sameMultIndex[0] - tmpM) != 1 && Math.abs(sameMultIndex[1] - tmpN) != 1) {
+        hasReversi = true
+        while (tmpM > sameMultIndex[0] && tmpN < sameMultIndex[1]) {
+          this.blocks[tmpM][tmpN] = this.currentPlayer
+          tmpM--
+          tmpN++
+        }
+      }
+
+      return hasReversi
     },
     clickRestart() {
       this.isShow = true
