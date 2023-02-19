@@ -4,7 +4,7 @@
     <div id="ctrl-area">
       <div class="menu">
         <div class="menu-restart" @click="clickRestart">投了</div>
-        <div class="current-chess">轮到黑子</div>
+        <div class="current-chess">轮到 {{ this.currentPlayer == 0 ? '黑子' : '白子' }}</div>
         <div class="count">黑子数:{{ blackChessCount }}</div>
         <div class="count">白字数:{{ whiteChessCount }}</div>
       </div>
