@@ -60,21 +60,18 @@ function getWinner(blocks) {
 			}
 		}
 	}
-	console.log(blackChessCount)
-	console.log(whiteChessCount)
-	console.log(emptyChessCount)
 	// 棋盘下满
 	// 其中一方为0
 	if (blackChessCount == 0 || whiteChessCount == 0 || emptyChessCount == 0) {
 		if (blackChessCount > whiteChessCount) {
 			return {
 				isEnd: true,
-				winner: 'black'
+				winner: 0
 			}
 		} else {
 			return {
 				isEnd: true,
-				winner: 'white'
+				winner: 1
 			}
 		}
 	}
@@ -333,6 +330,7 @@ wss.on('connection', function connection(ws) {
 			try {
 				const roomId = obj.data.roomId
 				const blocks = obj.data.blocks
+				const newestBlock = obj.data.newestBlock
 				roomGroups[roomId].blocks = blocks
 				const { winner, isEnd } = getWinner(blocks)
 				const currentPlayer = roomGroups[roomId].currentPlayer
@@ -343,6 +341,7 @@ wss.on('connection', function connection(ws) {
 						data: {
 							winner,
 							blocks,
+							newestBlock
 						}
 					})
 					return
@@ -353,7 +352,8 @@ wss.on('connection', function connection(ws) {
 						action: 'chess-continue',
 						data: {
 							blocks,
-							currentPlayer: currentPlayer
+							currentPlayer: currentPlayer,
+							newestBlock
 						}
 					})
 					return
@@ -366,7 +366,8 @@ wss.on('connection', function connection(ws) {
 					action: 'play-success',
 					data: {
 						blocks,
-						currentPlayer: getAnotherChessColorCode(currentPlayer)
+						currentPlayer: getAnotherChessColorCode(currentPlayer),
+						newestBlock
 					}
 				})
 			} catch (e) {

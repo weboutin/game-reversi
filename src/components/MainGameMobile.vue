@@ -3,7 +3,8 @@
     <div class="header">黑白棋</div>
     <div id="ctrl-area">
       <div class="menu">
-        <div class="menu-lost" @click="clickLost">投了</div>
+        <div class="menu-lost" @click="clickLost">投降</div>
+        <div class="menu-hint" @click="getHints">提示</div>
         <div class="menu-record">
           <div class="menu-user">
             <span class="menu-item">持有 {{ this.ownPlayer == 0 ? '黑子' : '白子' }}</span>
@@ -19,7 +20,10 @@
         <div class="ctr-pannel">
           <div v-for="row, rowIndex in blocks" :key="rowIndex" class="ctr-pannel-row">
             <div v-for="block, blockIndex in row" :key="`${rowIndex}-${blockIndex}`" :class="['block-box']">
+              <!-- <div :class="['block', (rowIndex == newestBlock[0] && blockIndex == newestBlock[1]) ? 'newest-block' : '']" -->
               <div class="block" @click="play(rowIndex, blockIndex)">
+                <div class="newest-block" v-if="rowIndex == newestBlock[0] && blockIndex == newestBlock[1]"></div>
+                <div class="hint-block" v-if="hintGroups.includes(`${rowIndex},${blockIndex}`)"></div>
                 <div :class="['chess', block == 0 ? 'black-chess' : 'white-chess']" v-if="block != -1"></div>
               </div>
             </div>
@@ -57,6 +61,7 @@ export default {
   },
   data: () => {
     return {
+      newestBlock: [],
       // gameStatus: store.state.gameStatus,
       // blocks: [
       //   [-1, -1, -1, -1, -1, -1, -1, -1],
@@ -82,6 +87,7 @@ export default {
       // currentPlayer: 0,
       blackChessCount: 2,
       whiteChessCount: 2,
+      hintGroups: []
     }
   },
   computed: {
@@ -146,6 +152,22 @@ export default {
         }
       })
     },
+    getHints() {
+      if (this.currentPlayer != this.ownPlayer) {
+        this.$toast.show('正在等待对方下棋')
+        return
+      }
+      const tmp = []
+      for (let i = 0; i < 8; i++) {
+        for (let j = 0; j < 8; j++) {
+          if (this.blocks[i][j] == -1) {
+            const { hasReversi } = this.reversi(i, j, this.currentPlayer)
+            if (hasReversi) tmp.push(`${i},${j}`)
+          }
+        }
+      }
+      this.hintGroups = tmp
+    },
     continueNext() {
       wsService.send({
         action: 'restart',
@@ -172,6 +194,7 @@ export default {
       wsService.send({
         action: 'play',
         data: {
+          newestBlock: [i, j],
           roomId: this.roomId,
           blocks: tmpBlocks,
         }
@@ -377,13 +400,16 @@ export default {
     })
 
     wsService.registerHandler('play-success', (obj) => {
+      this.hintGroups = []
       store.commit('setBlocks', obj.data.blocks)
       store.commit('setCurrentPlayer', obj.data.currentPlayer)
+      const newestBlock = obj.data.newestBlock
+      this.newestBlock = newestBlock
       this.render()
     })
 
     wsService.registerHandler('chess-continue', (obj) => {
-      this.$toast.show('子继续')
+      this.$toast.show(`[${obj.data.currentPlayer == 0 ? '黑': '白'}]子继续`)
       store.commit('setBlocks', obj.data.blocks)
       store.commit('setCurrentPlayer', obj.data.currentPlayer)
       this.render()
@@ -393,7 +419,7 @@ export default {
       store.commit('setBlocks', obj.data.blocks)
       store.commit('changeStatus', constant.GAME_STATUS.END)
       const winner = obj.data.winner
-      this.$toast.show(`${winner} 胜利`)
+      this.$toast.show(`${winner == 0 ? '黑子' : '白子'} 胜利`)
       this.render()
     })
     wsService.registerHandler('restart-success', (obj) => {
@@ -404,7 +430,6 @@ export default {
     })
     wsService.registerHandler('giveup-success', (obj) => {
       const giveUpPlayer = obj.data.giveUpPlayer
-      console.log(giveUpPlayer)
       store.commit('setBlocks', obj.data.blocks)
       this.$toast.show(`${giveUpPlayer == this.userId ? '你' : '对方'}认输了，棋局将重新开始`)
       store.commit('changeStatus', constant.GAME_STATUS.STARTED)
@@ -452,6 +477,19 @@ export default {
   cursor: pointer;
   color: rgb(255, 255, 255);
 }
+
+.menu-hint {
+  margin-left: 10px;
+  width: 100px;
+  height: 40px;
+  background-color: rgb(96, 201, 96);
+  line-height: 40px;
+  text-align: center;
+  border-radius: 5px;
+  cursor: pointer;
+  color: rgb(255, 255, 255);
+}
+
 
 .menu-change {
   width: 100px;
@@ -569,6 +607,7 @@ export default {
   padding-bottom: 5px;
   box-sizing: border-box;
   height: 40px;
+  margin-left: 10px;
   /* align-items: end;
   justify-content: space-between; */
 }
@@ -584,5 +623,22 @@ export default {
 .menu-score {
   display: flex;
   margin-top: 5px;
+}
+
+.newest-block {
+  width: 40px;
+  height: 40px;
+  border: 1px solid;
+  position: absolute;
+  color: #0065e6;
+}
+
+.hint-block {
+  width: 20px;
+  height: 20px;
+  border: 1px solid;
+  position: absolute;
+  color: rgb(81, 155, 75);
+  border-radius: 100px;
 }
 </style>
