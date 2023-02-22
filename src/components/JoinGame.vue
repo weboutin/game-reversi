@@ -2,7 +2,7 @@
 
 <template>
 	<div>
-		<div class="header">黑白棋{{ this.gameStatus }}</div>
+		<div class="header"></div>
 		<div class="main">
 			<div class="text">加入房间: </div>
 			<input v-model="inputRoomId" placeholder="房间号">
