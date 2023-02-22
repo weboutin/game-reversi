@@ -2,7 +2,7 @@
 
 <template>
 	<div>
-		<div class="header"></div>
+		<div class="header">黑白棋</div>
 		<div class="main">
 			<div class="text">加入房间: </div>
 			<input v-model="inputRoomId" placeholder="房间号">
@@ -40,8 +40,8 @@ export default {
 				store.commit('changeStatus', constant.GAME_STATUS.STARTED)
 				store.commit('setRoomId', info.roomId)
 				store.commit('setUserId', userId)
-        store.commit('setCurrentPlayer', data.data.currentPlayer)
-        store.commit('setOwnPlayer', 1)
+				store.commit('setCurrentPlayer', data.data.currentPlayer)
+				store.commit('setOwnPlayer', 1)
 			})
 			wsService.send({
 				action: 'join-room',
@@ -62,8 +62,8 @@ export default {
 				store.commit('changeStatus', constant.GAME_STATUS.CREATED)
 				store.commit('setRoomId', info.roomId)
 				store.commit('setUserId', userId)
-        store.commit('setOwnPlayer', 0)
-        store.commit('setCurrentPlayer', data.data.currentPlayer)
+				store.commit('setOwnPlayer', 0)
+				store.commit('setCurrentPlayer', data.data.currentPlayer)
 			})
 			wsService.send({
 				action: 'create-room',
@@ -77,6 +77,10 @@ export default {
 		}
 	},
 	mounted: function () {
+
+		wsService.registerHandler('room-not-exists', () => {
+			this.$toast.show('房间号不存在')
+		})
 	}
 
 }

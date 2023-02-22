@@ -298,6 +298,14 @@ wss.on('connection', function connection(ws) {
 		},
 		'join-room': (obj) => {
 			const roomId = obj.data.roomId
+			if (!roomGroups[roomId]) {
+				ws.send(JSON.stringify({
+					action: 'room-not-exists',
+					data: {
+					}
+				}))
+				return
+			}
 			roomGroups[roomId].wsMap[obj.data.userId] = ws
 			roomGroups[roomId].whiteUserId = obj.data.userid
 			roomGroups[roomId].gameStatus = constant.GAME_STATUS.STARTED
