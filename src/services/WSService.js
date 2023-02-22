@@ -1,5 +1,11 @@
 
 
+// console.log(VUE_APP_WS_SERVER_URL)
+// console.log(process.env.VUE_APP_WS_SERVER_URL)
+
+const WS_URL = process.env.VUE_APP_WS_SERVER_URL
+
+
 
 class WSService {
 	socket = null
@@ -12,7 +18,8 @@ class WSService {
 		if (this.socket) return this.socket
 
 		// this.conn = new WebSocket('ws://124.223.207.198:7080/')
-		this.socket = new WebSocket('ws://127.0.0.1:7080/')
+		this.socket = new WebSocket(WS_URL)
+
 
 		this.socket.addEventListener('open', () => {
 			this.isReady = true
