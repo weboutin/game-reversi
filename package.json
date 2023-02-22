@@ -1,18 +1,24 @@
 {
-  "name": "game-2048",
+  "name": "game-reversi",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "dev": "nodemon ./server/app"
   },
   "dependencies": {
     "core-js": "^3.8.3",
+    "express": "^4.18.2",
+    "nodemon": "^2.0.20",
     "normalize.css": "^8.0.1",
     "reset.css": "^2.0.2",
     "swiper": "^9.0.5",
-    "vue": "^2.6.14"
+    "vue": "^2.6.14",
+    "vue-cookies": "^1.8.2",
+    "vuex": "^3.2.0",
+    "ws": "^8.12.1"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",

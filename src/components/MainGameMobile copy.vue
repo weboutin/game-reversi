@@ -4,15 +4,10 @@
     <div id="ctrl-area">
       <div class="menu">
         <div class="menu-lost" @click="clickLost">投了</div>
-        <div class="menu-record">
-          <div class="menu-user">
-            <span class="menu-item">持有 {{ this.ownPlayer == 0 ? '黑子' : '白子' }}</span>
-            <span class="menu-item">轮到 {{ this.currentPlayer == 0 ? '黑子' : '白子' }}</span>
-          </div>
-          <div class="menu-score">
-            <span class="menu-item">黑子数:{{ blackChessCount }}</span>
-            <span class="menu-item">白子数:{{ whiteChessCount }}</span>
-          </div>
+        <div class="menu-score">
+          <div class="current-chess">轮到 {{ this.currentPlayer == 0 ? '黑子' : '白子' }}</div>
+          <div class="count">黑子数:{{ blackChessCount }}</div>
+          <div class="count">白字数:{{ whiteChessCount }}</div>
         </div>
       </div>
       <div class="ctr-pannel-box">
@@ -27,12 +22,12 @@
         </div>
       </div>
     </div>
-    <div class="new-game-box" v-if="ownPlayer == 0 && gameStatus == 3">
-      <div class="btn-new-game" @click="continueNext">开始下一局</div>
+    <div class="new-game-box">
+      <div class="btn-new-game">开始下一局</div>
     </div>
     <CommonPopup :isShow="isShow" @close="isShow = false">
       <div class="restartPopup">
-        <div class="restartPopup-ensure" @click="giveup">认输</div>
+        <div class="restartPopup-ensure" @click="restart">认输</div>
         <div class="restartPopup-cancel" @click="clickCancel">取消</div>
       </div>
     </CommonPopup>
@@ -58,16 +53,16 @@ export default {
   data: () => {
     return {
       // gameStatus: store.state.gameStatus,
-      // blocks: [
-      //   [-1, -1, -1, -1, -1, -1, -1, -1],
-      //   [-1, -1, -1, -1, -1, -1, -1, -1],
-      //   [-1, -1, -1, -1, -1, -1, -1, -1],
-      //   [-1, -1, -1, 0, 1, -1, -1, -1],
-      //   [-1, -1, -1, 1, 0, -1, -1, -1],
-      //   [-1, -1, -1, -1, -1, -1, -1, -1],
-      //   [-1, -1, -1, -1, -1, -1, -1, -1],
-      //   [-1, -1, -1, -1, -1, -1, -1, -1],
-      // ],
+      blocks: [
+        [-1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, 0, 1, -1, -1, -1],
+        [-1, -1, -1, 1, 0, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1, -1],
+      ],
       // blocks: [
       //   [1, 1, 1, -1, 1, 1, 1, 1],
       //   [0, 1, 1, -1, 1, 1, 0, 1],
@@ -78,10 +73,12 @@ export default {
       //   [0, 0, 1, 0, 1, 0, 1, -1],
       //   [0, 0, 0, 0, 0, 0, 0, -1],
       // ],
+      score: 4,
       isShow: false,
-      // currentPlayer: 0,
+      currentPlayer: 0,
       blackChessCount: 2,
       whiteChessCount: 2,
+      isEnd: false
     }
   },
   computed: {
@@ -94,71 +91,16 @@ export default {
       get() {
         return store.state.roomId
       }
-    },
-    blocks: {
-      get() {
-        return store.state.blocks
-      },
-    },
-    currentPlayer: {
-      get() {
-        return store.state.currentPlayer
-      }
-    },
-    ownPlayer: {
-      get() {
-        return store.state.ownPlayer
-      }
-    },
-    userId: {
-      get() {
-        return store.state.userId
-      }
-    }
-  },
-  watch: {
-    blocks: {
-      immediate: true,
-      handler: function () {
-        this.blackChessCount = 0
-        this.whiteChessCount = 0
-        for (let i = 0; i < 8; i++) {
-          for (let j = 0; j < 8; j++) {
-            if (this.blocks[i][j] == 0) {
-              this.blackChessCount++
-            } else if (this.blocks[i][j] == 1) {
-              this.whiteChessCount++
-            }
-          }
-        }
-
-      }
     }
   },
   methods: {
-    giveup() {
-      this.isShow = false
-      wsService.send({
-        action: 'giveup',
-        data: {
-          roomId: this.roomId,
-          userId: this.userId
-        }
-      })
-    },
-    continueNext() {
-      wsService.send({
-        action: 'restart',
-        data: {
-          roomId: this.roomId,
-        }
-      })
-    },
     getCurrentChessColor(player) {
       return player == 0 ? '黑' : '白'
     },
+    getAnotherPlayer() {
+      return this.currentPlayer == 0 ? 1 : 0
+    },
     play(i, j) {
-      if (this.currentPlayer != this.ownPlayer) return
       if (this.blocks[i][j] != -1) return
       //翻转棋子
       const { hasReversi, tmpBlocks } = this.reversi(i, j, this.currentPlayer)
@@ -167,15 +109,75 @@ export default {
         return
       }
       //下子
-      tmpBlocks[i][j] = this.currentPlayer
+      this.blocks = tmpBlocks
+      this.blocks[i][j] = this.currentPlayer
 
-      wsService.send({
-        action: 'play',
-        data: {
-          roomId: this.roomId,
-          blocks: tmpBlocks,
+      this.render()
+      // 判断胜负
+      const isEnd = this.countChess()
+      if (isEnd) return
+
+      //判断对手是否存在下子空间
+      const canPlay = this.checkCanPlay();
+
+      //继续由当前棋手下子
+      if (!canPlay) {
+        this.$message
+        this.$toast.show(`${this.getCurrentChessColor(this.getAnotherPlayer)}子没有可放置位置，本轮弃权`)
+        return
+      }
+
+
+      //切换棋手
+      if (this.currentPlayer == 0) {
+        this.currentPlayer = 1
+      } else {
+        this.currentPlayer = 0
+      }
+    },
+
+    countChess() {
+      this.blackChessCount = 0
+      this.whiteChessCount = 0
+      this.emptyChess = 0
+      for (let i = 0; i < 8; i++) {
+        for (let j = 0; j < 8; j++) {
+          if (this.blocks[i][j] == 0) {
+            this.blackChessCount++
+          } else if (this.blocks[i][j] == 1) {
+            this.whiteChessCount++
+          } else if (this.blocks[i][j] == -1) {
+            this.emptyChess++
+          }
         }
-      })
+      }
+      // 棋盘下满
+      // 其中一方为0
+      if (this.blackChessCount == 0 || this.whiteChessCount == 0 || this.emptyChess == 0) {
+        if (this.blackChessCount > this.whiteChessCount) {
+          this.$toast.show(`黑子胜利`)
+        } else {
+          this.$toast.show(`白子子胜利`)
+        }
+        this.isEnd = true
+        return true
+      }
+      return false
+    },
+
+    checkCanPlay() {
+      for (let i = 0; i < 8; i++) {
+        for (let j = 0; j < 8; j++) {
+          if (this.blocks[i][j] == -1) {
+            const { hasReversi } = this.reversi(i, j, this.getAnotherPlayer(this.currentPlayer))
+            if (hasReversi) {
+              return true
+            }
+          }
+
+        }
+      }
+      return false
     },
     reversi(m, n, player) {
       let tmpBlocks = JSON.parse(JSON.stringify(this.blocks))
@@ -371,44 +373,13 @@ export default {
 
   },
   mounted() {
+
     wsService.registerHandler('start-game', () => {
       this.$toast.show('游戏开始')
+      const info = this.$cookies.get(this.$storagekey)
+      info.gameStatus = constant.GAME_STATUS.STARTED
       store.commit('changeStatus', constant.GAME_STATUS.STARTED)
-    })
-
-    wsService.registerHandler('play-success', (obj) => {
-      store.commit('setBlocks', obj.data.blocks)
-      store.commit('setCurrentPlayer', obj.data.currentPlayer)
-      this.render()
-    })
-
-    wsService.registerHandler('chess-continue', (obj) => {
-      this.$toast.show('子继续')
-      store.commit('setBlocks', obj.data.blocks)
-      store.commit('setCurrentPlayer', obj.data.currentPlayer)
-      this.render()
-    })
-
-    wsService.registerHandler('game-end', (obj) => {
-      store.commit('setBlocks', obj.data.blocks)
-      store.commit('changeStatus', constant.GAME_STATUS.END)
-      const winner = obj.data.winner
-      this.$toast.show(`${winner} 胜利`)
-      this.render()
-    })
-    wsService.registerHandler('restart-success', (obj) => {
-      store.commit('setBlocks', obj.data.blocks)
-      this.$toast.show(`重新开始游戏`)
-      store.commit('changeStatus', constant.GAME_STATUS.STARTED)
-      this.render()
-    })
-    wsService.registerHandler('giveup-success', (obj) => {
-      const giveUpPlayer = obj.data.giveUpPlayer
-      console.log(giveUpPlayer)
-      store.commit('setBlocks', obj.data.blocks)
-      this.$toast.show(`${giveUpPlayer == this.userId ? '你' : '对方'}认输了，棋局将重新开始`)
-      store.commit('changeStatus', constant.GAME_STATUS.STARTED)
-      this.render()
+      this.$cookies.set(this.$storagekey, JSON.stringify(info))
     })
   }
 }
@@ -564,25 +535,13 @@ export default {
   color: rgb(255, 255, 255);
 }
 
-.menu-record {
+.menu-score {
   width: 220px;
   padding-bottom: 5px;
   box-sizing: border-box;
   height: 40px;
-  /* align-items: end;
-  justify-content: space-between; */
-}
-
-.menu-user {
   display: flex;
-}
-
-.menu-item {
-  width: 100px;
-}
-
-.menu-score {
-  display: flex;
-  margin-top: 5px;
+  align-items: end;
+  justify-content: space-between;
 }
 </style>
