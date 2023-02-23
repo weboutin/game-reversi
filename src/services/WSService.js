@@ -14,12 +14,15 @@ class WSService {
 
 	handlers = {}
 
-	connect(func) {
+	maxTry = 3;
+
+	tryTimes = 0
+
+
+	tryConnect(func, errCb) {
 		if (this.socket) return this.socket
 
-		// this.conn = new WebSocket('ws://124.223.207.198:7080/')
 		this.socket = new WebSocket(WS_URL)
-
 
 		this.socket.addEventListener('open', () => {
 			this.isReady = true
@@ -34,7 +37,21 @@ class WSService {
 				console.warn(e)
 			}
 		});
-		return this.socket
+
+
+		setTimeout(() => {
+			if (!this.isReady) {
+				console.log(`try connect times ${this.tryTimes}`)
+				this.socket.close()
+				this.socket = null
+				this.tryTimes++
+				if (this.tryTimes < this.maxTry) {
+					this.tryConnect(func, errCb)
+				} else {
+					errCb()
+				}
+			}
+		}, 4000)
 	}
 	send(obj) {
 		if (!this.isReady) {
