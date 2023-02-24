@@ -70,34 +70,34 @@
         <div class="loading-text">正在建立连接 ...</div>
       </div>
       <div v-else>
-        <MainGame v-if="!inMenu" />
-        <JoinGame v-else />
+        <WebMode v-if="gameStatus == 1 || gameStatus == 2 || gameStatus == 3" />
+        <Menu v-if="gameStatus == 0" />
+        <ComputerMode v-if="gameStatus == 4" />
       </div>
     </template>
-
   </div>
 </template>
 
 <script>
 import 'reset.css'
 
-import MainGame from './components/MainGameMobile.vue'
-import JoinGame from './components/JoinGame.vue'
+import WebMode from './components/WebMode.vue'
+import Menu from './components/Menu.vue'
+import ComputerMode from './components/ComputerMode.vue'
 import store from './stores'
-import constant from './constant'
 import WSService from './services/WSService'
-
 
 export default {
   name: 'App',
   components: {
-    MainGame,
-    JoinGame
+    WebMode,
+    Menu,
+    ComputerMode,
   },
   computed: {
-    inMenu: {
+    gameStatus: {
       get() {
-        return store.state.gameStatus === constant.GAME_STATUS.MENU
+        return store.state.gameStatus
       }
     }
   },
@@ -122,6 +122,7 @@ export default {
           const ownChess = obj.data.ownChess
           store.commit('setOwnPlayer', ownChess[obj.data.userId])
           store.commit('setCurrentPlayer', obj.data.currentPlayer)
+          store.commit('setNewestBlock', obj.data.newestBlock)
           this.wsConnecting = false
         })
         WSService.send({

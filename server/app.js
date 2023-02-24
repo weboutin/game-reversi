@@ -38,7 +38,7 @@ class Chess {
 	wsMap = {}
 	ownChess = {}
 	gameStatus = constant.GAME_STATUS.MENU
-
+	newestBlock = []
 }
 
 
@@ -320,6 +320,7 @@ wss.on('connection', function connection(ws) {
 				uWs.send(JSON.stringify({
 					action: 'start-game',
 					data: {
+						blocks: roomGroups[roomId].blocks,
 						black: roomGroups[roomId].blackUserId,
 						white: roomGroups[roomId].whiteUserId
 					}
@@ -332,6 +333,7 @@ wss.on('connection', function connection(ws) {
 				const blocks = obj.data.blocks
 				const newestBlock = obj.data.newestBlock
 				roomGroups[roomId].blocks = blocks
+				roomGroups[roomId].newestBlock = newestBlock
 				const { winner, isEnd } = getWinner(blocks)
 				const currentPlayer = roomGroups[roomId].currentPlayer
 				if (isEnd) {
@@ -387,7 +389,8 @@ wss.on('connection', function connection(ws) {
 					gameStatus: roomGroups[roomId] ? roomGroups[roomId].gameStatus : constant.GAME_STATUS.MENU,
 					blocks: roomGroups[roomId] ? roomGroups[roomId].blocks : defaultBlocks,
 					ownChess: roomGroups[roomId] ? roomGroups[roomId].ownChess : [],
-					currentPlayer: roomGroups[roomId] ? roomGroups[roomId].currentPlayer : 0
+					currentPlayer: roomGroups[roomId] ? roomGroups[roomId].currentPlayer : 0,
+					newestBlock: roomGroups[roomId] ? roomGroups[roomId].newestBlock : []
 				}
 			}))
 		},
@@ -396,6 +399,7 @@ wss.on('connection', function connection(ws) {
 			roomGroups[roomId].gameStatus = constant.GAME_STATUS.STARTED
 			roomGroups[roomId].blocks = defaultBlocks
 			roomGroups[roomId].currentPlayer = 0
+			roomGroups[roomId].newestBlock = []
 			publish(roomId, {
 				action: 'restart-success',
 				data: {
@@ -409,6 +413,7 @@ wss.on('connection', function connection(ws) {
 			roomGroups[roomId].gameStatus = constant.GAME_STATUS.STARTED
 			roomGroups[roomId].blocks = defaultBlocks
 			roomGroups[roomId].currentPlayer = 0
+			roomGroups[roomId].newestBlock = []
 			publish(roomId, {
 				action: 'giveup-success',
 				data: {

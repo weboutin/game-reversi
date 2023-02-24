@@ -14,7 +14,7 @@ Vue.prototype.$toast = {
     document.body.appendChild(instance.$el)
     setTimeout(()=>{
       document.body.removeChild(instance.$el)
-    }, 3000)
+    }, 2000)
   }
 }
 Vue.prototype.$serverMsg = {

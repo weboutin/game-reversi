@@ -63,6 +63,7 @@ class WSService {
 
 	handlerServerMsg(obj) {
 		console.log(obj)
+		console.log(this.handlers[obj.action])
 		this.handlers[obj.action].forEach(func => {
 			func(obj)
 		});

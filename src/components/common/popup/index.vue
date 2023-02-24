@@ -45,7 +45,7 @@ export default {
 	width: 100%;
 	height: 100%;
 	top: 0px;
-	background-color: rgb(94, 85, 85, 0.6);
+	background-color: rgb(94, 85, 85, 0.1);
 }
 
 .main {
