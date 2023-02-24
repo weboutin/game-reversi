@@ -350,6 +350,20 @@ wss.on('connection', function connection(ws) {
 				}
 				const canplay = checkCanPlay(blocks, getAnotherChessColorCode(currentPlayer))
 				if (!canplay) {
+					const currentCanPlay = this.checkCanPlay(blocks, currentPlayer)
+					//双方皆没有下子空间
+					if (!currentCanPlay) {
+						const winner = this.getWinner(this.blocks, true)
+						publish(roomId, {
+							action: 'game-end',
+							data: {
+								winner,
+								blocks,
+								newestBlock
+							}
+						})
+						return
+					}
 					publish(roomId, {
 						action: 'chess-continue',
 						data: {

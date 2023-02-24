@@ -17,7 +17,7 @@ export default {
 	name: 'CommonHeader',
 	methods: {
 		home: function() {
-			store.commit('changeStatus', constant.GAME_STATUS.MENU)
+			store.commit('setPage', constant.PAGE.MENU)
 		}
 	}
 }

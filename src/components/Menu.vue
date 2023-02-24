@@ -15,7 +15,8 @@
 					<input v-model="inputRoomId" placeholder="房间号">
 					<div class="btn-ensure" @click="joinGame">进入</div>
 				</div>
-				<div class="btn-create" @click="createRoom">创建房间 </div>
+				<div class="btn-create" @click="createRoom">创建房间</div>
+				<div class="btn-back" @click="backRoom" v-if="gameStatus == 2">返回对局</div>
 			</div>
 		</div>
 	</div>
@@ -41,7 +42,10 @@ export default {
 	},
 	methods: {
 		vsComputer: function () {
-			store.commit('changeStatus', constant.GAME_STATUS.VSCOMPUTER)
+			store.commit('setPage', constant.PAGE.AI)
+		},
+		backRoom: function () {
+			store.commit('setPage', constant.PAGE.WEB)
 		},
 		joinGame: function () {
 			const roomId = this.inputRoomId
@@ -54,6 +58,7 @@ export default {
 				}
 				this.$cookies.set(this.$storagekey, JSON.stringify(info))
 				store.commit('changeStatus', constant.GAME_STATUS.STARTED)
+				store.commit('setPage', constant.PAGE.WEB)
 				store.commit('setRoomId', info.roomId)
 				store.commit('setUserId', userId)
 				store.commit('setCurrentPlayer', data.data.currentPlayer)
@@ -78,6 +83,7 @@ export default {
 				}
 				this.$cookies.set(this.$storagekey, JSON.stringify(info))
 				store.commit('changeStatus', constant.GAME_STATUS.CREATED)
+				store.commit('setPage', constant.PAGE.WEB)
 				store.commit('setRoomId', info.roomId)
 				store.commit('setUserId', userId)
 				store.commit('setOwnPlayer', 0)
@@ -179,5 +185,17 @@ input {
 	border-radius: 5px;
 	cursor: pointer;
 	color: rgb(255, 255, 255);
+}
+
+.btn-back {
+	width: 100%;
+	height: 40px;
+	background-color: rgb(98, 145, 214);
+	line-height: 40px;
+	text-align: center;
+	border-radius: 5px;
+	cursor: pointer;
+	color: rgb(255, 255, 255);
+	margin-top: 20px;
 }
 </style>

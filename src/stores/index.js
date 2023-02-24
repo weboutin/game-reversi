@@ -25,7 +25,8 @@ export default new Vuex.Store({
 			[-1, -1, -1, -1, -1, -1, -1, -1],
 		],
 		ownPlayer: 0,
-		newestBlock: []
+		newestBlock: [],
+		page: 0
 	},
 	mutations: {
 		changeStatus(state, payload) {
@@ -48,6 +49,9 @@ export default new Vuex.Store({
 		},
 		setNewestBlock(state, payload) {
 			state.newestBlock = payload
+		},
+		setPage(state, payload) {
+			state.page = payload
 		}
 	}
 })

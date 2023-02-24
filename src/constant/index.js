@@ -1,5 +1,11 @@
 
 
+exports.PAGE = {
+	MENU: 0,
+	AI: 1,
+	WEB: 2
+}
+
 exports.GAME_STATUS = {
 	//创建房间的菜单
 	MENU: 0,

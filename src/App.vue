@@ -70,9 +70,9 @@
         <div class="loading-text">正在建立连接 ...</div>
       </div>
       <div v-else>
-        <WebMode v-if="gameStatus == 1 || gameStatus == 2 || gameStatus == 3" />
-        <Menu v-if="gameStatus == 0" />
-        <ComputerMode v-if="gameStatus == 4" />
+        <Menu v-if="page == 0" />
+        <ComputerMode v-if="page == 1" />
+        <WebMode v-if="page == 2" />
       </div>
     </template>
   </div>
@@ -86,6 +86,7 @@ import Menu from './components/Menu.vue'
 import ComputerMode from './components/ComputerMode.vue'
 import store from './stores'
 import WSService from './services/WSService'
+import constant from '@/constant'
 
 export default {
   name: 'App',
@@ -99,11 +100,15 @@ export default {
       get() {
         return store.state.gameStatus
       }
+    },
+    page: {
+      get() {
+        return store.state.page
+      }
     }
   },
   data: function () {
     return {
-      state: store.state.gameStatus,
       wsConnecting: true,
       connectError: false
     }
@@ -123,6 +128,7 @@ export default {
           store.commit('setOwnPlayer', ownChess[obj.data.userId])
           store.commit('setCurrentPlayer', obj.data.currentPlayer)
           store.commit('setNewestBlock', obj.data.newestBlock)
+          store.commit('setPage', constant.PAGE.WEB)
           this.wsConnecting = false
         })
         WSService.send({
