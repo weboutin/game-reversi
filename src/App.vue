@@ -114,6 +114,9 @@ export default {
     }
   },
   mounted() {
+    window.addEventListener('touchmove', function (e) {
+      e.preventDefault()
+    }, { passive: false })
     //loading
     WSService.tryConnect(() => {
       const info = this.$cookies.get(this.$storagekey)
