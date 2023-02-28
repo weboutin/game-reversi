@@ -11,9 +11,6 @@ export default {
 	props: {
 		message: String
 	},
-	created() {
-		console.log(1)
-	}
 }
 </script>
 

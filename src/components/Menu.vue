@@ -42,6 +42,7 @@ export default {
 	},
 	methods: {
 		vsComputer: function () {
+			// store.commit('setPage', 3)
 			store.commit('setPage', constant.PAGE.AI)
 		},
 		backRoom: function () {

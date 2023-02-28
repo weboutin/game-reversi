@@ -24,6 +24,7 @@
 import ChessBoard from './common/chessboard'
 import Header from './common/header'
 import AI from '../AI/index'
+import constant from '@/constant'
 
 export default {
   name: 'ComputerMode',
@@ -36,7 +37,9 @@ export default {
       currentPlayer: 0,
       blackCount: 0,
       whiteCount: 0,
-      isShowHints: false
+      isShowHints: false,
+      levelOneWin: 0,
+      levelTwoWin: 0,
     }
   },
   methods: {
@@ -54,26 +57,53 @@ export default {
       return player == 0 ? 1 : 0
     },
     onPlay: function (data) {
-      this.currentPlayer = this.switchPlayer(this.currentPlayer)
-      if (data.player == 0) {
-        const { m, n } = AI.play(data.blocks, this.currentPlayer, 3)
-        this.$refs['chessBoard'].play(m, n, 1)
-      }
+      // this.currentPlayer = this.switchPlayer(this.currentPlayer)
+      setTimeout(() => {
+        if (data.player == 0) {
+          const { m, n } = AI.play(data.blocks, 1, 3)
+          this.$refs['chessBoard'].play(m, n, 1)
+        } else {
+          const { m, n } = AI.play(data.blocks, 0, 2)
+          this.$refs['chessBoard'].play(m, n, 0)
+        }
+      }, 0);
     },
     onEnd: function (winner) {
-      this.$toast.show(`${this.transferText(winner)}胜利`)
+      // this.$toast.show(`${this.transferText(winner)}胜利`)
+      winner == 0 ? this.levelTwoWin++ : this.levelOneWin++
+      console.log(`levelOne胜场 ${this.levelOneWin}, levelTwo胜场 ${this.levelTwoWin}`)
+      setTimeout(() => {
+        console.log('开始下一场')
+        this.restart()
+        this.onPlay({
+          blocks: constant.DEFAULT_BLOCKS,
+          player: 1
+        })
+      }, 0)
     },
     onPlayerContinue(player, blocks) {
-      this.$toast.show(`${this.transferText(player)}继续行棋`)
-      if (player == 0) {
-        const { m, n } = AI.play(blocks, player, 3)
-        this.$refs['chessBoard'].play(m, n, 1)
-      }
+      // this.$toast.show(`${this.transferText(player)}继续行棋`)
+      console.log(`${this.transferText(player)}继续行棋`)
+      setTimeout(() => {
+        if (player == 0) {
+          const { m, n } = AI.play(blocks, 0, 3)
+          this.$refs['chessBoard'].play(m, n, 0)
+        } else {
+          const { m, n } = AI.play(blocks, 1, 2)
+          this.$refs['chessBoard'].play(m, n, 1)
+        }
+      }, 0)
     },
     onCount(black, white) {
       this.blackCount = black
       this.whiteCount = white
     }
+  },
+  mounted() {
+    this.onPlay({
+      blocks: constant.DEFAULT_BLOCKS,
+      player: 1
+    })
   }
 
 }

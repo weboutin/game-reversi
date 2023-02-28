@@ -5,9 +5,16 @@ function getRandomInt(min, max) {
 	return Math.floor(Math.random() * (max - min)) + min; //不含最大值，含最小值
 }
 
-exports.play = function (blocks, player) {
-	return levelTwo(blocks, player)
-	// return levelOne(blocks, player)
+exports.play = function (blocks, player, level) {
+	if (level == 1) {
+		return levelOne(blocks, player)
+	}
+	if (level == 2) {
+		return levelTwo(blocks, player)
+	}
+	if (level == 3) {
+		return levelThree(blocks, player)
+	}
 }
 
 function levelOne(blocks, player) {
@@ -27,8 +34,6 @@ function levelOne(blocks, player) {
 	}
 	return result
 }
-levelTwo
-levelOne
 
 function levelTwo(blocks, player) {
 	const scoreMap = {}
@@ -54,8 +59,56 @@ function levelTwo(blocks, player) {
 		}
 	}
 	const arr = scoreMap[maxScore]
-	console.log(scoreMap)
-	console.log(maxScore)
+	const index = getRandomInt(0, arr.length)
+	const result = {
+		m: Number(arr[index].split(',')[0]),
+		n: Number(arr[index].split(',')[1]),
+	}
+	return result
+}
+
+function levelThree(blocks, player) {
+	const scoreMap = {}
+	let maxScore = null
+	let resultMap = {}
+	let tmp = ['0,0', '0,7', '7,7', '7,0']
+	for (let i = 0; i < 8; i++) {
+		for (let j = 0; j < 8; j++) {
+			if (blocks[i][j] == -1) {
+				const { hasReversi, score } = reversi(i, j, player, blocks, { needScore: true })
+				if (hasReversi) {
+					resultMap[`${i},${j}`] = score
+					if (maxScore == null) {
+						maxScore = score
+					} else if (score > maxScore) {
+						maxScore = score
+					}
+					if (!scoreMap[score]) {
+						scoreMap[score] = []
+						scoreMap[score].push(`${i},${j}`)
+					} else {
+						scoreMap[score].push(`${i},${j}`)
+					}
+				}
+			}
+		}
+	}
+	let tryMaxCount = 0
+	let tryMax = null
+	for (let i = 0; i < tmp.length; i++) {
+		if (resultMap[tmp[i]] && resultMap[tmp[i] > tryMaxCount]) {
+			tryMaxCount = resultMap[tmp[i]]
+			tryMax = tmp[i]
+		}
+	}
+	if (tryMax) {
+
+		return {
+			m: Number(tryMax.split(',')[0]),
+			n: Number(tryMax.split(',')[1]),
+		}
+	}
+	const arr = scoreMap[maxScore]
 	const index = getRandomInt(0, arr.length)
 	const result = {
 		m: Number(arr[index].split(',')[0]),

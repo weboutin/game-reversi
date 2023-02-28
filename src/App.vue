@@ -73,6 +73,7 @@
         <Menu v-if="page == 0" />
         <ComputerMode v-if="page == 1" />
         <WebMode v-if="page == 2" />
+        <AIOnlyMode v-if="page == 13" />
       </div>
     </template>
   </div>
@@ -84,6 +85,7 @@ import 'reset.css'
 import WebMode from './components/WebMode.vue'
 import Menu from './components/Menu.vue'
 import ComputerMode from './components/ComputerMode.vue'
+import AIOnlyMode from './components/AIOnlyMode.vue'
 import store from './stores'
 import WSService from './services/WSService'
 import constant from '@/constant'
@@ -94,6 +96,7 @@ export default {
     WebMode,
     Menu,
     ComputerMode,
+    AIOnlyMode
   },
   computed: {
     gameStatus: {

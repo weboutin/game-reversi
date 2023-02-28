@@ -218,7 +218,7 @@ export default {
 						this.$emit('end', winner)
 						return
 					}
-					this.$emit('playerContinue', player)
+					this.$emit('playerContinue', player, this.blocks)
 					return
 				}
 			}
